@@ -1,6 +1,9 @@
 package com.qingting.protocol.mqttImp.process.Impl.dataHandler;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,6 +12,7 @@ import java.util.Properties;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.druid.pool.DruidPooledConnection;
+import com.qingting.util.MqttTool;
 
 /**
  *  数据库连接类，处理了连接池和数据库打开关闭操作
@@ -21,13 +25,19 @@ public class DBConnection {
 
 	private static DruidDataSource  ds = null;   
 	private static DBConnection dbConnection = null;
-	private static final String CONFIG_FILE = Thread.currentThread().getContextClassLoader().getResource("").getPath()+"druid.properties";
+	private static final String CONFIG_FILE = "/druid.properties";
 		
 	static {
 		try{
-	        FileInputStream in = new FileInputStream(CONFIG_FILE);
-	        Properties props = new Properties();
-	        props.load(in);
+			InputStream ips = MqttTool.class.getResourceAsStream(CONFIG_FILE);
+			BufferedReader ipss = new BufferedReader(new InputStreamReader(ips));
+			Properties props = new Properties();
+			props.load(ipss);
+			
+			
+	        //FileInputStream in = new FileInputStream(CONFIG_FILE);
+	        //Properties props = new Properties();
+	        //props.load(in);
 	        ds = (DruidDataSource) DruidDataSourceFactory.createDataSource(props);
 	     }catch(Exception ex){
 	         ex.printStackTrace();

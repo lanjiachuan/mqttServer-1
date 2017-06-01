@@ -2,19 +2,16 @@ package com.qingting.protocol.mqttImp.process;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
-
 import org.apache.log4j.Logger;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 
-import com.qingting.customer.baseserver.MonitorService;
-import com.qingting.customer.common.pojo.hbasedo.Monitor;
+import com.qingting.kafka.ProducerBase;
 import com.qingting.protocol.mqttImp.MQTTMesageFactory;
 import com.qingting.protocol.mqttImp.message.ConnAckMessage;
 import com.qingting.protocol.mqttImp.message.ConnAckMessage.ConnectionStatus;
@@ -61,7 +58,7 @@ import io.netty.handler.timeout.IdleStateHandler;
  * @date 2015-2-16
  */
 public class ProtocolProcess {
-	@Resource
+	/*@Resource
 	MonitorService monitorService;
 	{
 		monitorService=
@@ -69,7 +66,7 @@ public class ProtocolProcess {
 						Thread.currentThread().getContextClassLoader().getResource("").getPath()+
 						"applicationContext.xml"
 						).getBean("monitorService");
-	}
+	}*/
 	//遗嘱信息类
 	static final class WillMessage {
         private final String topic;
@@ -408,7 +405,7 @@ public class ProtocolProcess {
 			boolean dup = false;
 			System.out.println("Qos=1,Dup=0");
 			
-			System.out.println("monitorService:"+monitorService);
+			//System.out.println("monitorService:"+monitorService);
 			
 			//将ByteBuf转变为byte[]
 			byte[] messageBytes = new byte[message.readableBytes()];
@@ -416,11 +413,11 @@ public class ProtocolProcess {
 			if (messageBytes.length <= 0) {
 				//retainedStore.remove(topic);
 			} else {
-				Monitor monitor=null;
+				//Monitor monitor=null;
 				for (byte b : messageBytes) {
 					System.out.println("接收的消息："+b);
 				}
-				monitor=new Monitor();
+				//monitor=new Monitor();
 				//monitor.setD((float)2.0);
 				//monitor.setFlow((float)2.1);
 				
@@ -431,13 +428,19 @@ public class ProtocolProcess {
 					if(bytes[i]!=0){
 						int a=bytesToInt(bytes,i,bytes.length-i);
 						System.out.println(a);
-						monitor.setEquipId(id);
+						//monitor.setEquipId(id);
 						break;
 					}
 				}
 				//monitor.setId(25L);
-				monitor.setPurTds((float)100.00);
-				monitorService.insertMonitor(monitor);
+				//monitor.setPurTds((float)100.00);
+				//monitorService.insertMonitor(monitor);
+				
+				ProducerBase producerBase=new ProducerBase();
+				System.out.println("The key:"+clientID+":"+new Date().getTime()+".The value:"+new String(messageBytes));
+				producerBase.send("monitor", 0, clientID+":"+new Date().getTime(), new String(messageBytes));
+				producerBase.close();
+				
 				//StoredMessage storedMessage = new StoredMessage(messageBytes, qos, topic);
 				//retainedStore.put(topic, storedMessage);
 			}

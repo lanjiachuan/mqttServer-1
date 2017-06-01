@@ -43,7 +43,7 @@ public class TcpServer {
 	public TcpServer(){
 		this.port = MqttTool.getPropertyToInt(PORT);// 从配置中获取端口号
 		if(this.port == null){
-			this.port = 50021;// 设置默认端口为50021
+			this.port = 40040;// 设置默认端口为40040
 		}
 	}
 

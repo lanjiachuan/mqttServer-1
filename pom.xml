@@ -3,7 +3,7 @@
 	<groupId>com.qingting.mqttServer</groupId>
 	<artifactId>mqttServer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-
+	<packaging>jar</packaging>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,19 +63,25 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- customer-server-api支持 -->
+		<!-- customer-server-api支持 
 		<dependency>
 			<groupId>com.qingting.customer</groupId>
 			<artifactId>customer-server-api</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<!-- spring测试 -->
+		</dependency>-->
+		<!-- spring测试 
 		<dependency>  
             <groupId>org.springframework</groupId>  
             <artifactId>spring-test</artifactId>  
             <version>4.2.1.RELEASE</version>
             <scope>test</scope>  
-        </dependency>
+        </dependency>-->
+        <!-- kafka -->
+        <dependency>
+		    <groupId>org.apache.kafka</groupId>
+		    <artifactId>kafka_2.10</artifactId>
+		    <version>0.10.2.1</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -90,6 +96,73 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
+			<!-- <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<archive>
+			            <manifest>
+			                <mainClass>com.qingting.mqtt.server.StartServer</mainClass>
+			                <addClasspath>true</addClasspath>
+			            <classpathPrefix>lib/</classpathPrefix>
+			            </manifest>
+        			</archive>
+				</configuration>
+			</plugin> -->
+			<plugin>  
+	            <groupId>org.apache.maven.plugins</groupId>  
+	            <artifactId>maven-assembly-plugin</artifactId>  
+	            <version>2.5.5</version>  
+	            <configuration>  
+	                <archive>  
+	                    <manifest>  
+	                        <mainClass>com.qingting.mqtt.server.StartServer</mainClass>  
+	                    </manifest>  
+	                </archive>  
+	                <descriptorRefs>  
+	                    <descriptorRef>jar-with-dependencies</descriptorRef>  
+	                </descriptorRefs>  
+	            </configuration>  
+	            <executions>  
+	                <execution>  
+	                    <id>make-assembly</id>  
+	                    <phase>package</phase>  
+	                    <goals>  
+	                        <goal>single</goal>  
+	                    </goals>  
+	                </execution>  
+	            </executions>  
+	        </plugin>  
+			<!-- <plugin>  
+	            <groupId>org.apache.maven.plugins</groupId>  
+	            <artifactId>maven-shade-plugin</artifactId>  
+	            <version>2.4.1</version>  
+	            <executions>  
+	                <execution>  
+	                    <phase>package</phase>  
+	                    <goals>  
+	                        <goal>shade</goal>  
+	                    </goals>  
+	                    <configuration>  
+	                        <transformers>  
+	                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">  
+	                                <mainClass>com.qingting.mqtt.server.StartServer</mainClass>  
+	                            </transformer>  
+	                            <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">  
+	                                <resource>META-INF/spring.handlers</resource>  
+	                            </transformer>  
+	                            <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">  
+	                                <resource>META-INF/spring.schemas</resource>  
+	                            </transformer>  
+	                        </transformers>  
+	                    </configuration>  
+	                </execution>  
+	            </executions>  
+	        </plugin>  --> 
 		</plugins>
 	</build>
 </project>

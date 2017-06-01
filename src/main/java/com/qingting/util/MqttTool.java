@@ -1,7 +1,10 @@
 package com.qingting.util;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -19,7 +22,7 @@ public class MqttTool {
 	
 	private static Properties props = new Properties();
 	//配置文件路径
-	private static final String CONFIG_FILE =Thread.currentThread().getContextClassLoader().getResource("").getPath()+"mqtt.properties";
+	private static final String CONFIG_FILE ="/mqtt.properties";
 	
 	static{
 		loadProperties(CONFIG_FILE);
@@ -35,9 +38,15 @@ public class MqttTool {
 	 */
 	private static void loadProperties(String propertyFilePath){
 		try {
-			FileInputStream in = new FileInputStream(propertyFilePath);
-			props = new Properties();
-			props.load(in);
+			//InputStream ips = MqttTool.class.getResourceAsStream("/config/app.properties");
+			InputStream ips = MqttTool.class.getResourceAsStream(propertyFilePath);
+			BufferedReader ipss = new BufferedReader(new InputStreamReader(ips));
+			props.load(ipss);
+			
+			
+			//FileInputStream in = new FileInputStream(propertyFilePath);
+			//props = new Properties();
+			//props.load(in);
 		} catch (IOException e) {
 			Log.error("属性文件读取错误");
 			e.printStackTrace();
