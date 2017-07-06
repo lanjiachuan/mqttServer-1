@@ -72,13 +72,20 @@ public class MQTTEncoder extends MessageToByteEncoder<Message> {
 			break;
 		case UNSUBACK:
 		case PUBACK:
+			Log.info("------encode-switch-PUBACK-------");
+			encodedByteBuf = encodeMessageByteFixedHeaderAndPackageId(byteBufAllocator, msg);
+			break;
 		case PUBREC:
 		case PUBREL:
 		case PUBCOMP:
+			Log.info("------encode-switch-PUBCOMP-------");
 			encodedByteBuf = encodeMessageByteFixedHeaderAndPackageId(byteBufAllocator, msg);
 			break;
 		case PINGREQ:
 		case PINGRESP:
+			Log.info("------encode-switch-PINGRESP-------");
+			encodedByteBuf = encodeMessageByteFixedHeader(byteBufAllocator, msg);
+			break;
 		case DISCONNECT:
 			encodedByteBuf = encodeMessageByteFixedHeader(byteBufAllocator, msg);
 			break;
@@ -354,7 +361,7 @@ public class MQTTEncoder extends MessageToByteEncoder<Message> {
 		byteBuf.writeBytes(encodeFixHeader(fixedHeader));
 		byteBuf.writeByte(0);//写入剩余长度，没有可变头部和荷载，所以剩余长度为0
 		
-		return null;
+		return byteBuf;
 	}
 	
 	/**

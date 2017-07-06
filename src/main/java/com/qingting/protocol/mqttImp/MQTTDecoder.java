@@ -57,7 +57,7 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {
-		System.out.println("解码："+state());
+		System.out.println("--------------开始解码："+state());
 		int bytesRemainingInVariablePart = 0;
 		
 		switch (state()) {
@@ -117,7 +117,7 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 		//byteBuf.resetReaderIndex();
 		//解码头部第一个字节
 		byte headerData = byteBuf.readByte();
-		System.out.println("headerData:"+headerData);
+		System.out.println("头部第一个字节headerData:"+headerData);
 		MessageType type = MessageType.valueOf((headerData >> 4) & 0xF);
 		Boolean dup = (headerData & 0x8) > 0;
 		QoS qos = QoS.valueOf((headerData & 0x6) >> 1);
@@ -535,7 +535,7 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 			throw new DecoderException("该UTF字符串长度有误，长度"+utfLength);
 		}
 		//根据长度解码出String
-		String utfStr = byteBuf.readBytes(utfLength).toString(CharsetUtil.UTF_8);
+		String utfStr = byteBuf.readBytes(utfLength).toString(CharsetUtil.US_ASCII);
 		//计算已解码掉的长度，为字符串长度加最前面两个长度字段字节的长度
 		int useNumOfBytes = utfLength + 2;
 		return new Result<String>(utfStr, useNumOfBytes);

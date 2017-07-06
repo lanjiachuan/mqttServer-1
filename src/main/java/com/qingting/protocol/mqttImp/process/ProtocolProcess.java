@@ -222,9 +222,10 @@ public class ProtocolProcess {
 		NettyAttrManager.setAttrClientId(client, connectMessage.getPayload().getClientId());
 		NettyAttrManager.setAttrCleanSession(client, connectMessage.getVariableHeader().isCleanSession());
 		//协议P29规定，在超过1.5个keepAlive的时间以上没收到心跳包PingReq，就断开连接(但这里要注意把单位是s转为ms)
-		NettyAttrManager.setAttrKeepAlive(client, keepAlive);
+		float keepAliveTemp=(((float)keepAlive)*1.5f);
+		NettyAttrManager.setAttrKeepAlive(client, (int)keepAliveTemp);
 		//添加心跳机制处理的Handler
-		client.pipeline().addFirst("idleStateHandler", new IdleStateHandler(keepAlive, Integer.MAX_VALUE, Integer.MAX_VALUE, TimeUnit.SECONDS));
+		client.pipeline().addFirst("idleStateHandler", new IdleStateHandler((int)keepAliveTemp, Integer.MAX_VALUE, Integer.MAX_VALUE, TimeUnit.SECONDS));
 		
 		//处理Will flag（遗嘱信息）,协议P26
 		if (connectMessage.getVariableHeader().isHasWill()) {
@@ -437,8 +438,8 @@ public class ProtocolProcess {
 				//monitorService.insertMonitor(monitor);
 				
 				ProducerBase producerBase=new ProducerBase();
-				System.out.println("The key:"+clientID+":"+new Date().getTime()+".The value:"+new String(messageBytes));
-				producerBase.send("monitor", 0, clientID+":"+new Date().getTime(), new String(messageBytes));
+				System.out.println("The key:"+clientID+":"+recPackgeID+".The value:"+new String(messageBytes));
+				producerBase.send("monitor", 0, clientID+":"+recPackgeID, messageBytes);
 				producerBase.close();
 				
 				//StoredMessage storedMessage = new StoredMessage(messageBytes, qos, topic);
@@ -633,10 +634,10 @@ public class ProtocolProcess {
    	 * @date 2015-5-24
    	 */
 	public void processPingReq(Channel client, Message pingReqMessage){
-		 Log.info("收到心跳包");
+		 Log.info("收到心跳包"+pingReqMessage.getFixedHeader().toString());
 		 Message pingRespMessage = MQTTMesageFactory.newMessage(
 				 FixedHeader.getPingRespFixedHeader(), 
-				 null, 
+				 null,
 				 null);
 		 //重置心跳包计时器
 		 client.writeAndFlush(pingRespMessage);

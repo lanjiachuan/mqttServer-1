@@ -50,20 +50,28 @@ public final class MQTTMesageFactory {
                         (UnSubscribePayload) payload);
 
             case PUBLISH:
+            	System.out.println("--------switch-PUBLISH---------");
                 return new PublishMessage(
                         fixedHeader,
                         (PublishVariableHeader) variableHeader,
                         (ByteBuf) payload);
 
             case PUBACK:
+            	System.out.println("--------switch-PUBACK---------");
             case UNSUBACK:
+            	System.out.println("--------switch-UNSUBACK---------");
             case PUBREC:
+            	System.out.println("--------switch-PUBREC---------");
             case PUBREL:
+            	System.out.println("--------switch-PUBREL---------");
             case PUBCOMP:
+            	System.out.println("--------switch-PUBCOMP---------");
                 return new Message(fixedHeader, variableHeader);
 
             case PINGREQ:
+            	System.out.println("--------switch-PINGREQ---------");
             case PINGRESP:
+            	return new Message(fixedHeader);
             case DISCONNECT:
                 return new Message(fixedHeader);
 

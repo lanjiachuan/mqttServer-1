@@ -8,10 +8,13 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 public class ProducerBase {
 	private Properties props =null;
-	private Producer<String, String> producer = null;
+	private Producer<String, byte[]> producer = null;
 	public ProducerBase(){
 		props = new Properties();
-		props.put("bootstrap.servers", "119.29.225.162:9092");
+		//props.put("bootstrap.servers", "localhost:9092");
+		
+		props.put("bootstrap.servers", "39.108.52.201:9092");
+		
         //props.put("zookeeper.connect", "119.29.225.162:2281");//声明zk
         //The "all" setting we have specified will result in blocking on the full commit of the record, the slowest but most durable setting.
         //“所有”设置将导致记录的完整提交阻塞，最慢的，但最持久的设置。
@@ -27,13 +30,16 @@ public class ProducerBase {
         props.put("buffer.memory", 33554432);
         //The key.serializer and value.serializer instruct how to turn the key and value objects the user provides with their ProducerRecord into bytes.
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
 
         //创建kafka的生产者类
-		producer = new KafkaProducer<String, String>(props);
+		producer = new KafkaProducer<String, byte[]>(props);
 	}
-	public void send(String topic, Integer partition, String key, String value){
-		producer.send(new ProducerRecord<String, String>(topic,partition, key, value));
+	public void send(String topic, Integer partition, String key, byte[] value){
+		ProducerRecord<String, byte[]> record =new ProducerRecord<String,byte[]>(topic,partition, key,value);
+		producer.send(record);
+		//producer.send(new ProducerRecord<String, String>(topic,partition, key, value));
+		
 	}
 	public void close(){
 		producer.close();
