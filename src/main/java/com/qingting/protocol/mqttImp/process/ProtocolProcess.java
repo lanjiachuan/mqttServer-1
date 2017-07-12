@@ -415,14 +415,16 @@ public class ProtocolProcess {
 				//retainedStore.remove(topic);
 			} else {
 				//Monitor monitor=null;
+				System.out.print("processPublic方法接收到的消息messageBytes:");
 				for (byte b : messageBytes) {
-					System.out.println("接收的消息："+b);
+					System.out.print(b+" ");
 				}
+				System.out.println("");
 				//monitor=new Monitor();
 				//monitor.setD((float)2.0);
 				//monitor.setFlow((float)2.1);
 				
-				Integer id=0;
+				/*Integer id=0;
 				System.out.print("clientID:");
 				byte[] bytes = clientID.getBytes();
 				for (int i=0; i<bytes.length;i++) {
@@ -432,7 +434,7 @@ public class ProtocolProcess {
 						//monitor.setEquipId(id);
 						break;
 					}
-				}
+				}*/
 				//monitor.setId(25L);
 				//monitor.setPurTds((float)100.00);
 				//monitorService.insertMonitor(monitor);
