@@ -15,7 +15,10 @@ public class PublishMessage extends Message {
 			ByteBuf payload) {
 		super(fixedHeader, variableHeader, payload);
 	}
-	
+	public PublishMessage(FixedHeader fixedHeader, PublishVariableHeader variableHeader,
+			byte[] payload) {
+		super(fixedHeader, variableHeader, payload);
+	}
 	@Override
 	public PublishVariableHeader getVariableHeader() {
 		return (PublishVariableHeader)super.getVariableHeader();

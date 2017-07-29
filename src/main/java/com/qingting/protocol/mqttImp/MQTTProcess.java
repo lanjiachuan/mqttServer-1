@@ -1,5 +1,7 @@
 package com.qingting.protocol.mqttImp;
 
+import org.apache.log4j.Logger;
+
 import com.qingting.protocol.mqttImp.message.ConnectMessage;
 import com.qingting.protocol.mqttImp.message.Message;
 import com.qingting.protocol.mqttImp.message.PackageIdVariableHeader;
@@ -22,13 +24,14 @@ import io.netty.handler.timeout.IdleStateHandler;
  * @date 2015-2-16
  */
 public class MQTTProcess extends ChannelHandlerAdapter {
-
+	private final static Logger Log = Logger.getLogger(MQTTProcess.class);
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
 		ProtocolProcess process = ProtocolProcess.getInstance();
 		Message message = (Message)msg;
-		System.out.println("协议处理："+message.getFixedHeader().getMessageType());
+		Log.info("协议处理："+message.getFixedHeader().getMessageType());
+		Log.info("MessageLength："+message.getFixedHeader().getMessageLength());
 		switch (message.getFixedHeader().getMessageType()) {
 		case CONNECT:
 			process.processConnect(ctx.channel(), (ConnectMessage)message);

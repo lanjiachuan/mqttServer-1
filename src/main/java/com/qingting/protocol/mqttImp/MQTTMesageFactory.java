@@ -51,11 +51,16 @@ public final class MQTTMesageFactory {
 
             case PUBLISH:
             	System.out.println("--------switch-PUBLISH---------");
-                return new PublishMessage(
-                        fixedHeader,
-                        (PublishVariableHeader) variableHeader,
-                        (ByteBuf) payload);
-
+                if(payload instanceof ByteBuf)
+	            	return new PublishMessage(
+	                        fixedHeader,
+	                        (PublishVariableHeader) variableHeader,
+	                        (ByteBuf) payload);
+                else
+                	return new PublishMessage(
+	                        fixedHeader,
+	                        (PublishVariableHeader) variableHeader,
+	                        (byte[]) payload);
             case PUBACK:
             	System.out.println("--------switch-PUBACK---------");
             case UNSUBACK:

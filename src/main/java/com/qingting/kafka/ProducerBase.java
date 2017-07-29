@@ -5,11 +5,10 @@ import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-
-public class ProducerBase {
+public class ProducerBase<K,V> {
 	private Properties props =null;
-	private Producer<String, byte[]> producer = null;
-	public ProducerBase(){
+	private Producer<K, V> producer = null;
+	public ProducerBase(String kType,String vType){
 		props = new Properties();
 		//props.put("bootstrap.servers", "localhost:9092");
 		
@@ -29,20 +28,25 @@ public class ProducerBase {
         //生产者缓冲大小，当缓冲区耗尽后，额外的发送调用将被阻塞。时间超过max.block.ms将抛出TimeoutException
         props.put("buffer.memory", 33554432);
         //The key.serializer and value.serializer instruct how to turn the key and value objects the user provides with their ProducerRecord into bytes.
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+        if(kType.toUpperCase().equals("STRING")){ 
+        	props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        }else if(kType.toUpperCase().equals("BYTEARRAY")){
+        	props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+        }
+        if(vType.toUpperCase().equals("STRING")){
+        	props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        }else if(vType.toUpperCase().equals("BYTEARRAY")){
+        	props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+        }
 
         //创建kafka的生产者类
-		producer = new KafkaProducer<String, byte[]>(props);
+		producer = new KafkaProducer<K, V>(props);
 	}
-	public void send(String topic, Integer partition, String key, byte[] value){
-		ProducerRecord<String, byte[]> record =new ProducerRecord<String,byte[]>(topic,partition, key,value);
+	public void send(String topic, Integer partition, K key, V value){
+		ProducerRecord<K, V> record =new ProducerRecord<K,V>(topic,partition, key,value);
 		producer.send(record);
-		//producer.send(new ProducerRecord<String, String>(topic,partition, key, value));
-		
 	}
 	public void close(){
 		producer.close();
-		//producer.close(timeout, unit);
 	}
 }

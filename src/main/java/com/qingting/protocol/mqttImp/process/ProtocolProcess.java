@@ -1,8 +1,9 @@
 package com.qingting.protocol.mqttImp.process;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.qingting.kafka.ProducerBase;
 import com.qingting.protocol.mqttImp.MQTTMesageFactory;
 import com.qingting.protocol.mqttImp.message.ConnAckMessage;
@@ -30,7 +33,14 @@ import com.qingting.protocol.mqttImp.message.SubscribeMessage;
 import com.qingting.protocol.mqttImp.message.TopicSubscribe;
 import com.qingting.protocol.mqttImp.message.UnSubscribeMessage;
 import com.qingting.protocol.mqttImp.process.Impl.IdentityAuthenticator;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.Get;
 import com.qingting.protocol.mqttImp.process.Impl.dataHandler.MapDBPersistentStore;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.RequestType;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowError;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowRequest;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowResponse;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowStore;
+import com.qingting.protocol.mqttImp.process.Impl.dataHandler.Shadow;
 import com.qingting.protocol.mqttImp.process.Interface.IAuthenticator;
 import com.qingting.protocol.mqttImp.process.Interface.IMessagesStore;
 import com.qingting.protocol.mqttImp.process.Interface.ISessionStore;
@@ -44,9 +54,12 @@ import com.qingting.util.QuartzManager;
 import com.qingting.util.StringTool;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.CharsetUtil;
 
 
 
@@ -58,15 +71,7 @@ import io.netty.handler.timeout.IdleStateHandler;
  * @date 2015-2-16
  */
 public class ProtocolProcess {
-	/*@Resource
-	MonitorService monitorService;
-	{
-		monitorService=
-				(MonitorService)new FileSystemXmlApplicationContext(
-						Thread.currentThread().getContextClassLoader().getResource("").getPath()+
-						"applicationContext.xml"
-						).getBean("monitorService");
-	}*/
+	
 	//遗嘱信息类
 	static final class WillMessage {
         private final String topic;
@@ -298,6 +303,15 @@ public class ProtocolProcess {
             //force the republish of stored QoS1 and QoS2
         	republishMessage(connectMessage.getPayload().getClientId());
         }
+        
+        /**
+         * 默认订阅主题，这里需要在完善产品管理后，移动到产品管理中去
+         */
+        String topicFilter = "get/"+connectMessage.getPayload().getClientId();//topicSubscribe.getTopicFilter();
+		QoS qos = QoS.AT_LEAST_ONCE;//topicSubscribe.getQos();
+		Subscription newSubscription = new Subscription(connectMessage.getPayload().getClientId(), topicFilter, qos, false);
+		//订阅新的订阅
+		subscribeSingleTopic(newSubscription, topicFilter);
 	}
 	
 	/**
@@ -310,6 +324,7 @@ public class ProtocolProcess {
    	 */
 	public void processPublic(Channel client, PublishMessage publishMessage){
 		Log.info("处理publish的数据");
+		Log.info("publishMessage:"+publishMessage.toString());
 		String clientID = NettyAttrManager.getAttrClientId(client);
 		final String topic = publishMessage.getVariableHeader().getTopic();
 	    final QoS qos = publishMessage.getFixedHeader().getQos();
@@ -317,7 +332,7 @@ public class ProtocolProcess {
 	    System.out.println(message);
 	    final int packgeID = publishMessage.getVariableHeader().getPackageID();
 	    final boolean retain = publishMessage.getFixedHeader().isRetain();
-	    
+	    Log.info("messageLength:"+message.capacity());
 	    processPublic(clientID, topic, qos, retain, message, packgeID);
 	}
 	
@@ -405,50 +420,22 @@ public class ProtocolProcess {
 			boolean retain = false;
 			boolean dup = false;
 			System.out.println("Qos=1,Dup=0");
-			
-			//System.out.println("monitorService:"+monitorService);
-			
-			//将ByteBuf转变为byte[]
-			byte[] messageBytes = new byte[message.readableBytes()];
-			message.getBytes(message.readerIndex(), messageBytes);
-			if (messageBytes.length <= 0) {
-				//retainedStore.remove(topic);
-			} else {
-				//Monitor monitor=null;
-				System.out.print("processPublic方法接收到的消息messageBytes:");
-				for (byte b : messageBytes) {
-					System.out.print(b+" ");
+			sendPubAck(clientID, recPackgeID);//这里换个位置，先发送pubAck给该客户端
+			if(topic.equals("update")){//影子消息
+				ShadowResponse shadowResponse = processShadow(clientID,qos,recRetain,message,recPackgeID);
+				if(shadowResponse!=null){
+					/*sendPublishMessageOfMyself("get/"+clientID, qos, 
+							shadowResponse.toString().getBytes(),
+							retain, dup);*/
+					sendPublishMessage("get/"+clientID, qos, 
+							ByteBufUtil.encodeString(PooledByteBufAllocator.DEFAULT, CharBuffer.wrap(shadowResponse.toString()), CharsetUtil.US_ASCII),
+							retain, dup);
 				}
-				System.out.println("");
-				//monitor=new Monitor();
-				//monitor.setD((float)2.0);
-				//monitor.setFlow((float)2.1);
-				
-				/*Integer id=0;
-				System.out.print("clientID:");
-				byte[] bytes = clientID.getBytes();
-				for (int i=0; i<bytes.length;i++) {
-					if(bytes[i]!=0){
-						int a=bytesToInt(bytes,i,bytes.length-i);
-						System.out.println(a);
-						//monitor.setEquipId(id);
-						break;
-					}
-				}*/
-				//monitor.setId(25L);
-				//monitor.setPurTds((float)100.00);
-				//monitorService.insertMonitor(monitor);
-				
-				ProducerBase producerBase=new ProducerBase();
-				System.out.println("The key:"+clientID+":"+recPackgeID+".The value:"+new String(messageBytes));
-				producerBase.send("monitor", 0, clientID+":"+recPackgeID, messageBytes);
-				producerBase.close();
-				
-				//StoredMessage storedMessage = new StoredMessage(messageBytes, qos, topic);
-				//retainedStore.put(topic, storedMessage);
+			}else{//其他消息
+				processGeneralPublicMessage(clientID,topic,qos,recRetain,message,recPackgeID);
+				sendPublishMessage(topic, qos, message, retain, dup);
 			}
-			sendPublishMessage(topic, qos, message, retain, dup);
-			sendPubAck(clientID, recPackgeID);
+			
 		}
 		
 		//根据协议P54，P55
@@ -471,7 +458,167 @@ public class ProtocolProcess {
 			}
 		}
 	}
+	/**
+	 * 
+	 * @Title: processGeneralPublicMessage
+	 * @Description: 发送消息到消息服务器
+	 * @param clientID
+	 * @param topic
+	 * @param qos
+	 * @param recRetain
+	 * @param message
+	 * @param recPackgeID 
+	 * @return void
+	 * @throws
+	 */
+	public void processGeneralPublicMessage(String clientID, String topic, QoS qos, boolean recRetain, ByteBuf message, Integer recPackgeID){
+		//将ByteBuf转变为byte[]
+		byte[] messageBytes = new byte[message.readableBytes()];
+		message.getBytes(message.readerIndex(), messageBytes);
+		
+		ProducerBase<String,byte[]> producerBase=new ProducerBase<String,byte[]>("String","byteArray");
+		System.out.println("The key:"+clientID+":"+recPackgeID+".The value:"+message);
+		
+		producerBase.send(topic, 0, clientID+":"+recPackgeID, messageBytes);
+		
+		producerBase.close();
+	}
 	
+	public ShadowResponse processShadow(String clientID,QoS qos, boolean recRetain, ByteBuf message, Integer recPackgeID){
+		//将ByteBuf转变为byte[]
+		byte[] messageBytes = new byte[message.readableBytes()];
+		message.getBytes(message.readerIndex(), messageBytes);
+		System.out.println("接收的消息"+new String(messageBytes));
+		/*if (messageBytes.length <= 0) {
+			//retainedStore.remove(topic);
+		} else {
+			//Monitor monitor=null;
+			System.out.print("processPublic方法接收到的消息messageBytes:");
+			for (byte b : messageBytes) {
+				System.out.print(b+" ");
+			}
+			System.out.println("");
+			//monitor=new Monitor();
+			//monitor.setD((float)2.0);
+			//monitor.setFlow((float)2.1);
+			
+//			Integer id=0;
+//			System.out.print("clientID:");
+//			byte[] bytes = clientID.getBytes();
+//			for (int i=0; i<bytes.length;i++) {
+//				if(bytes[i]!=0){
+//					int a=bytesToInt(bytes,i,bytes.length-i);
+//					System.out.println(a);
+//					//monitor.setEquipId(id);
+//					break;
+//				}
+//			}
+			//monitor.setId(25L);
+			//monitor.setPurTds((float)100.00);
+			//monitorService.insertMonitor(monitor);
+			
+			if(topic.equals("monitor")){//监测消息发送到消息服务器 
+				ProducerBase producerBase=new ProducerBase();
+				System.out.println("The key:"+clientID+":"+recPackgeID+".The value:"+new String(messageBytes));
+				producerBase.send("monitor", 0, clientID+":"+recPackgeID, messageBytes);
+				producerBase.close();
+			}else if(topic.equals("update")){//更新设备影子
+				messagesStore.storeRetained("update"+"/"+clientID,message,qos);
+				try {
+					String jsonString = new String(messageBytes,"UTF-8");
+					JSONObject jsStr = new JSONObject(jsonString);
+					jsStr.get("")
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				messagesStore.storeRetained("get"+"/"+clientID,message,qos);
+			}else if(topic.equals("update/error")){//设备错误
+				messagesStore.storeRetained("update/error"+"/"+clientID,message,qos);
+			}else if(topic.equals("get")){//这里位置有问题
+				
+			}
+			
+			//StoredMessage storedMessage = new StoredMessage(messageBytes, qos, topic);
+			//retainedStore.put(topic, storedMessage);
+		}*/
+		
+		//获取update请求数据
+		String jsonString=null;
+		try {
+			jsonString = new String(messageBytes,"UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		Log.info("jsonString:"+jsonString);
+		ShadowRequest shadowRequest=null;
+		try { 
+			shadowRequest =JSON.parseObject(jsonString,ShadowRequest.class); 
+			ShadowResponse shadowResponse = shadowRequest.verifyRequest(jsonString);
+			if(shadowResponse!=null){
+				Log.info(shadowResponse);
+				return shadowResponse;
+			}
+		} catch (JSONException e) { //json格式错误
+			return new ShadowResponse("reply").
+					updateShadowResponse(new Get("error",ShadowError.JSON_FORMAT_ERROR), null);
+		} catch (Exception e){
+			return new ShadowResponse("reply").
+					updateShadowResponse(new Get("error",ShadowError.SERVER_EXCEPTION), null);
+		}
+		Log.info("temp:"+shadowRequest);
+		/*JSONObject desired=null;
+		JSONObject reported=null;
+		if(temp.getState().has("desired")){
+			desired=(JSONObject) temp.getState().get("desired");
+		}
+		if(temp.getState().has("reported")){
+			reported=(JSONObject) temp.getState().get("reported");
+		}*/
+		//解析请求state
+		/*ShadowResponse shadowResponse = null;//temp.parserState();
+		if(shadowResponse!=null)
+			return shadowResponse;*/
+		//获取服务器影子文档
+		ShadowStore shadowStore=new ShadowStore(clientID);
+		Shadow shadow = JSON.parseObject(shadowStore.getJsonString(),Shadow.class);
+		
+		//判断请求类型
+		if(shadowRequest.getMethod().equals("update")){
+			Log.info("更新update");
+			if(shadowRequest.getRequestType().equals(RequestType.REPORTED)){
+				Log.info("设备上报状态");
+				//设备上报状态
+				//流程：更新shadow——>发送响应到get主题(即响应设备)
+				ShadowResponse temp=shadow.updateMetadata(shadowRequest);
+				if(temp!=null)	return temp;
+				shadowStore.reWriteShadow(JSON.toJSONString(shadow));
+				return new ShadowResponse("reply").
+						updateShadowResponse(new Get("success",null), shadow);
+			}else if(shadowRequest.getRequestType().equals(RequestType.CONTROL)){
+				Log.info("服务器主动改变设备状态");
+				//服务器主动改变设备状态
+				//流程：更新shadow——>发送状态到get主题(即响应设备)
+				ShadowResponse temp=shadow.updateMetadata(shadowRequest);
+				if(temp!=null)	return temp;
+				shadowStore.reWriteShadow(JSON.toJSONString(shadow));
+				return new ShadowResponse("control").
+						updateShadowResponse(new Get("success",null), shadow);
+			}else if(shadowRequest.getRequestType().equals(RequestType.UPEND)){
+				Log.info("设备状态更新结束");
+				ShadowResponse temp=shadow.updateMetadata(shadowRequest);
+				if(temp!=null)	return temp;
+				shadowStore.reWriteShadow(JSON.toJSONString(shadow));
+				//更新结束无响应
+			}
+		}else if(shadowRequest.getMethod().equals("get")){
+			Log.info("设备主动获取影子文档");
+			return new ShadowResponse("control").
+					updateShadowResponse(new Get("success",null), shadow);
+		}
+		//messagesStore.storeRetained("get"+"/"+clientID,message,qos);
+		
+		return null;
+	}
 	/**
    	 * 处理协议的pubAck消息类型
    	 * @param client
@@ -725,6 +872,7 @@ public class ProtocolProcess {
 				FixedHeader.getPublishFixedHeader(dup, pubEvent.getQos(), pubEvent.isRetain()), 
 				new PublishVariableHeader(pubEvent.getTopic(), pubEvent.getPackgeID()), 
 				Unpooled.buffer().writeBytes(pubEvent.getMessage()));
+		Log.info("重发的publish:"+publishMessage);
 		//从会话列表中取出会话，然后通过此会话发送publish消息
 		this.clients.get(pubEvent.getClientID()).getClient().writeAndFlush(publishMessage);
 	}
@@ -742,6 +890,92 @@ public class ProtocolProcess {
 		sendPubRel(pubEvent.getClientID(), pubEvent.getPackgeID());
 //	    messagesStore.removeQosPublishMessage(pubRelKey);
 	}
+	
+	
+	
+	/**
+	  * 取出所有匹配topic的客户端，然后发送public消息给客户端(临时调试用)
+	  * @param topic
+	  * @param qos
+	  * @param message
+	  * @param retain
+	  * @param PackgeID
+	  * @author zer0
+	  * @version 1.0
+     * @date 2015-05-19
+	  */
+	private void sendPublishMessageOfMyself(String topic, QoS originQos, byte[] message, boolean retain, boolean dup){
+		for (final Subscription sub : subscribeStore.getClientListFromTopic(topic)) {
+			
+			String clientID = sub.getClientID();
+			Integer sendPackageID = PackageIDManager.getNextMessageId();
+			String publishKey = String.format("%s%d", clientID, sendPackageID);
+			QoS qos = originQos;
+			
+			//协议P43提到， 假设请求的QoS级别被授权，客户端接收的PUBLISH消息的QoS级别小于或等于这个级别，PUBLISH 消息的级别取决于发布者的原始消息的QoS级别
+			if (originQos.ordinal() > sub.getRequestedQos().ordinal()) {
+				qos = sub.getRequestedQos(); 
+			}
+			
+			PublishMessage publishMessage = (PublishMessage) MQTTMesageFactory.newMessage(
+					FixedHeader.getPublishFixedHeader(dup, qos, retain), 
+					new PublishVariableHeader(topic, sendPackageID), 
+					message);
+			
+			if (this.clients == null) {
+				throw new RuntimeException("内部错误，clients为null");
+			} else {
+				Log.debug("clients为{"+this.clients+"}");
+			}
+			
+			if (this.clients.get(clientID) == null) {
+				throw new RuntimeException("不能从会话列表{"+this.clients+"}中找到clientID:{"+clientID+"}");
+			} else {
+				Log.debug("从会话列表{"+this.clients+"}查找到clientID:{"+clientID+"}");
+			}
+			
+			if (originQos == QoS.AT_MOST_ONCE) {
+				publishMessage = (PublishMessage) MQTTMesageFactory.newMessage(
+						FixedHeader.getPublishFixedHeader(dup, qos, retain), 
+						new PublishVariableHeader(topic), 
+						message);
+				//从会话列表中取出会话，然后通过此会话发送publish消息
+				this.clients.get(clientID).getClient().writeAndFlush(publishMessage);
+			}else {
+				publishKey = String.format("%s%d", clientID, sendPackageID);//针对每个重生成key，保证消息ID不会重复
+				//将ByteBuf转变为byte[]
+				PublishEvent storePublishEvent = new PublishEvent(topic, qos, message, retain, clientID, sendPackageID);
+				
+				Log.info("将消息发送给订阅topic的客户端，消息如下:"+new String(message));
+				Log.info("本次包ID为:"+sendPackageID);
+				
+				//从会话列表中取出会话，然后通过此会话发送publish消息
+				this.clients.get(clientID).getClient().writeAndFlush(publishMessage);
+				//存临时Publish消息，用于重发
+				messagesStore.storeQosPublishMessage(publishKey, storePublishEvent);
+				//开启Publish重传任务，在制定时间内未收到PubAck包则重传该条Publish信息
+				Map<String, Object> jobParam = new HashMap<String, Object>();
+				jobParam.put("ProtocolProcess", this);
+				jobParam.put("publishKey", publishKey);
+				QuartzManager.addJob(publishKey, "publish", publishKey, "publish", RePublishJob.class, 10, 2, jobParam);
+			}
+			
+			Log.info("服务器发送消息给客户端{"+clientID+"},topic{"+topic+"},qos{"+qos+"}");
+			
+			if (!sub.isCleanSession()) {
+				//将ByteBuf转变为byte[]
+				
+				PublishEvent newPublishEvt = new PublishEvent(topic, qos, message, 
+						 retain, sub.getClientID(), 
+						 sendPackageID != null ? sendPackageID : 0);
+               messagesStore.storeMessageToSessionForPublish(newPublishEvt);
+			}
+			
+			
+		}
+	}
+	
+	
 	
 	/**
 	  * 取出所有匹配topic的客户端，然后发送public消息给客户端
@@ -797,6 +1031,9 @@ public class ProtocolProcess {
 				byte[] messageBytes = new byte[message.readableBytes()];
 				message.getBytes(message.readerIndex(), messageBytes);
 				PublishEvent storePublishEvent = new PublishEvent(topic, qos, messageBytes, retain, clientID, sendPackageID);
+				
+				Log.info("将消息发送给订阅topic的客户端，消息如下:"+new String(messageBytes));
+				Log.info("本次包ID为:"+sendPackageID);
 				
 				//从会话列表中取出会话，然后通过此会话发送publish消息
 				this.clients.get(clientID).getClient().writeAndFlush(publishMessage);

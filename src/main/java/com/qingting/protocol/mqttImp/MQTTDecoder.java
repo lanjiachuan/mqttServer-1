@@ -57,7 +57,7 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {
-		System.out.println("--------------开始解码："+state());
+		Log.info("开始解码："+state());
 		int bytesRemainingInVariablePart = 0;
 		
 		switch (state()) {
@@ -79,6 +79,7 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 			final Result<?> payloadResult = decodePayload(in, fixedHeader.getMessageType(),
 					bytesRemainingInVariablePart, variableHeader);
 			payload = payloadResult.getValue();
+			Log.info("paload:"+payload);
 			bytesRemainingInVariablePart -= payloadResult.getUseNumOfBytes();
 			if (bytesRemainingInVariablePart != 0) {
 				throw new DecoderException("解码的字节数和剩余字节字段长度不匹配，最终剩余:" + bytesRemainingInVariablePart);
@@ -155,6 +156,7 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 	 * @date 2016-3-4
 	 */
 	private FixedHeader validateFixHeader(FixedHeader fixedHeader){
+		Log.info("头类型"+fixedHeader.getMessageType());
 		switch (fixedHeader.getMessageType()) {
 		case PUBREL:
 		case SUBSCRIBE:
