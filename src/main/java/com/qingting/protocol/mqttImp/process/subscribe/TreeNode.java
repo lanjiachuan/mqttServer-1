@@ -132,7 +132,7 @@ public class TreeNode {
 		}
     	
     	for (TreeNode n : children) {
-    		System.out.println(n.getToken().name);
+    		System.out.println("订阅:"+n.getToken().name);
     		if (n.getToken().name.equals(t.name)) {
 				n.getSubscription(new LinkedBlockingDeque<Token>(tokens), matchingSubs);
 			}

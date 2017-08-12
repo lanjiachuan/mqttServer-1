@@ -53,11 +53,11 @@ public class MQTTDecoder extends ReplayingDecoder<DecoderState> {
 	public MQTTDecoder(){
 		super(DecoderState.FIXED_HEADER);
 	}
-	
+	private static long pakCount=0;
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {
-		Log.info("开始解码："+state());
+		Log.info("开始解码："+state()+".pakCount="+(++pakCount));
 		int bytesRemainingInVariablePart = 0;
 		
 		switch (state()) {

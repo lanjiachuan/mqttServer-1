@@ -17,7 +17,7 @@
 	<context:annotation-config />
 	<!-- 服务调用扫描包 -->
 	<context:component-scan base-package="com.qingting.protocol.mqttImp.process"/>
-	<!-- <bean class="com.smart.mvc.config.ConfigUtils">
+	<!----> <bean class="com.smart.mvc.config.ConfigUtils">
 		<property name="fileEncoding" value="UTF-8" />
 		<property name="locations">
 			<list>
@@ -29,20 +29,20 @@
 				<value>classpath:config.properties</value>
 			</list>
 		</property>
-	</bean>  -->
+	</bean>  
 	
-	<!-- 单点登录权限RPC服务 
+	<!-- 单点登录权限RPC服务 -->
 	<bean id="authenticationRpcService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
 		<property name="serviceUrl" value="${sso.server.url}/rpc/authenticationRpcService" />
 		<property name="serviceInterface" value="com.smart.sso.rpc.AuthenticationRpcService" />
-	</bean>-->
+	</bean>
 
-	<!--redis : 用于部署多JVM实例时，RedisSession覆盖HttpSession实现Session共享
-	<import resource="classpath:spring-redis-sso.xml" />-->
+	<!--redis : 用于部署多JVM实例时，RedisSession覆盖HttpSession实现Session共享-->
+	<import resource="classpath:spring-redis-sso.xml" />
 	 
-	<!--activeMQ : 用于权限有修改时，异步通知应用更新权限
-	<import resource="classpath:spring-mq-sso.xml" />-->
+	<!--activeMQ : 用于权限有修改时，异步通知应用更新权限-->
+	<import resource="classpath:spring-mq-sso.xml" />
 	 
 	<!-- 引入服务相关 -->
-	<import resource="dubbo-consumer.xml" />
+	<!-- <import resource="dubbo-consumer.xml" /> -->
 </beans>

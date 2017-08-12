@@ -1,17 +1,12 @@
 package com.qingting.mqtt.server;
 
 
-import java.io.UnsupportedEncodingException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.qingting.kafka.ProducerBase;
-import com.qingting.protocol.mqttImp.process.Impl.dataHandler.Shadow;
-import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowRequest;
-import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowResponse;
-import com.qingting.protocol.mqttImp.process.Impl.dataHandler.ShadowStore;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+
 
 import io.netty.channel.ChannelFuture;
 
@@ -22,9 +17,11 @@ import io.netty.channel.ChannelFuture;
  * @version 1.0
  * @date 2015-2-14
  */
-public class StartServer {
+public class StartServer extends HttpServlet {
 	
-	public static void main(String[] args){
+	private static final long serialVersionUID = -2476134190488546146L;
+
+	public void init() throws ServletException{
 		/*ShadowStore shadowStore = new ShadowStore("123",true);
 		System.out.println(shadowStore.toString());
 		
@@ -54,15 +51,23 @@ public class StartServer {
 		System.out.println(shadowRequest);
 		ShadowResponse shadowResponse = shadowRequest.verifyRequest(jsonString);
 		System.out.println(shadowResponse);*/
-		final TcpServer tcpServer = new TcpServer();
-		ChannelFuture future = tcpServer.startServer();
 		
-		Runtime.getRuntime().addShutdownHook(new Thread(){
+		
+		new Thread(new Runnable(){
 			@Override
 			public void run() {
-				tcpServer.destory();
+				final TcpServer tcpServer = new TcpServer();
+				ChannelFuture future = tcpServer.startServer();
+				
+				Runtime.getRuntime().addShutdownHook(new Thread(){
+					@Override
+					public void run() {
+						tcpServer.destory();
+					}
+				});
+				future.channel().closeFuture().syncUninterruptibly();
 			}
-		});
-		future.channel().closeFuture().syncUninterruptibly();
+        }).start();
+		
 	}
 }

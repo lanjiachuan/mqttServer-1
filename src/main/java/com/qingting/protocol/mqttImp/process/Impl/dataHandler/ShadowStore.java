@@ -58,7 +58,7 @@ public class ShadowStore {
 						"},"+
 						"\"reported\":{"+
 						
-						"},"+
+						"}"+
 					"},"+
 					"\"metadata\":{"+
 						"\"desired\":{"+
@@ -66,7 +66,7 @@ public class ShadowStore {
 						"},"+
 						"\"reported\":{"+
 						
-						"},"+
+						"}"+
 					"},"+
 					"\"timestamp\":"+Calendar.getInstance().getTimeInMillis()+","+
 					"\"version\":0"+

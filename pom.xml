@@ -3,11 +3,23 @@
 	<groupId>com.qingting.mqttServer</groupId>
 	<artifactId>mqttServer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
+	<name>${project.artifactId}</name>
 	
 	<properties>
+		<smart.version>1.0.0</smart.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
+		
+		<server.port>80</server.port>
+		
+		<spring.version>4.2.1.RELEASE</spring.version>
+		<spring-redis.version>1.2.2.RELEASE</spring-redis.version>
+		<servlet.version>3.1.0</servlet.version>
+		
+		<slf4j.version>1.7.21</slf4j.version>
+		<logback.version>1.1.7</logback.version>
+		<jcl.version>1.7.21</jcl.version>
 	</properties>
 	
 	<dependencies>
@@ -16,6 +28,12 @@
 		    <artifactId>json</artifactId>
 		    <version>20170516</version>
 		</dependency> -->
+		<!-- sso单点登录客户端 -->
+		<dependency>
+			<groupId>com.smart</groupId>
+			<artifactId>smart-sso-client</artifactId>
+			<version>${smart.version}</version>
+		</dependency>
 		<dependency>
 		    <groupId>com.alibaba</groupId>
 		    <artifactId>fastjson</artifactId>
@@ -26,11 +44,38 @@
 		    <artifactId>druid</artifactId>
 		    <version>1.0.31</version>
 		</dependency>
-		<dependency>
+		
+		
+		<!-- <dependency>
 		    <groupId>log4j</groupId>
 		    <artifactId>log4j</artifactId>
 		    <version>1.2.17</version>
+		</dependency> -->
+		
+		<!-- 日志 -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		
+		<!-- 日志桥接，Spring中commons-logging替换为logback -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${jcl.version}</version>
+		</dependency>
+		<!-- 数据库 -->
 		<dependency>
 		    <groupId>org.mapdb</groupId>
 		    <artifactId>mapdb</artifactId>
@@ -92,11 +137,54 @@
 		    <artifactId>kafka_2.10</artifactId>
 		    <version>0.10.2.1</version>
 		</dependency>
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jms</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.session</groupId>
+		    <artifactId>spring-session-data-redis</artifactId>
+		    <version>${spring-redis.version}</version>
+		</dependency>
+		<!-- J2EE支持-->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${servlet.version}</version>
+			<scope>provided</scope>
+		</dependency> 
 	</dependencies>
 	
-	<build>
+	<!--<build>
 		<plugins>
-			<plugin>
+			 <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
@@ -106,23 +194,6 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-					<archive>
-			            <manifest>
-			                <mainClass>com.qingting.mqtt.server.StartServer</mainClass>
-			                <addClasspath>true</addClasspath>
-			            <classpathPrefix>lib/</classpathPrefix>
-			            </manifest>
-        			</archive>
-				</configuration>
-			</plugin> -->
 			<plugin>  
 	            <groupId>org.apache.maven.plugins</groupId>  
 	            <artifactId>maven-assembly-plugin</artifactId>  
@@ -147,32 +218,77 @@
 	                </execution>  
 	            </executions>  
 	        </plugin>  
-			<!-- <plugin>  
-	            <groupId>org.apache.maven.plugins</groupId>  
-	            <artifactId>maven-shade-plugin</artifactId>  
-	            <version>2.4.1</version>  
-	            <executions>  
-	                <execution>  
-	                    <phase>package</phase>  
-	                    <goals>  
-	                        <goal>shade</goal>  
-	                    </goals>  
-	                    <configuration>  
-	                        <transformers>  
-	                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">  
-	                                <mainClass>com.qingting.mqtt.server.StartServer</mainClass>  
-	                            </transformer>  
-	                            <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">  
-	                                <resource>META-INF/spring.handlers</resource>  
-	                            </transformer>  
-	                            <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">  
-	                                <resource>META-INF/spring.schemas</resource>  
-	                            </transformer>  
-	                        </transformers>  
-	                    </configuration>  
-	                </execution>  
-	            </executions>  
-	        </plugin>  --> 
+		
 		</plugins>
+	</build>--> 
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<version>3.0</version>
+					<warName>/${project.artifactId}</warName>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<port>${server.port}</port>
+					<path>/${project.artifactId}</path>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.4.2.v20170220</version>
+				<configuration>
+					<scanIntervalSeconds>3</scanIntervalSeconds>
+					<webApp>
+						<contextPath>/${project.artifactId}</contextPath>
+					</webApp>
+					<httpConnector>
+						<port>${server.port}</port>
+					</httpConnector>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>  
+	        <resource>  
+	            <directory>src/main/resources</directory>  
+	            <includes>  
+	            <include>**/*.properties</include>  
+	            <include>**/*.xml</include> 
+	            <include>**/*</include> 
+	            </includes>  
+	            <filtering>true</filtering>          
+	        </resource>  
+	    </resources>  
 	</build>
+	
+	<developers>
+		<developer>
+			<name>Zhou lingfeng</name>
+			<id>zlf</id>
+			<email>330233789@qq.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+	</developers>
 </project>

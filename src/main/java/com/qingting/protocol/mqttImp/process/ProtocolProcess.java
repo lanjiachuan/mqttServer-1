@@ -3,6 +3,7 @@ package com.qingting.protocol.mqttImp.process;
 import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -307,11 +308,19 @@ public class ProtocolProcess {
         /**
          * 默认订阅主题，这里需要在完善产品管理后，移动到产品管理中去
          */
+        //get主题默认订阅
         String topicFilter = "get/"+connectMessage.getPayload().getClientId();//topicSubscribe.getTopicFilter();
 		QoS qos = QoS.AT_LEAST_ONCE;//topicSubscribe.getQos();
 		Subscription newSubscription = new Subscription(connectMessage.getPayload().getClientId(), topicFilter, qos, false);
 		//订阅新的订阅
 		subscribeSingleTopic(newSubscription, topicFilter);
+		
+		//current主题默认订阅
+		String topicFilter2 = "current/"+connectMessage.getPayload().getClientId();
+		QoS qos2 = QoS.AT_LEAST_ONCE;//topicSubscribe.getQos();
+		Subscription newSubscription2 = new Subscription(connectMessage.getPayload().getClientId(), topicFilter2, qos2, false);
+		//订阅新的订阅
+		subscribeSingleTopic(newSubscription2, topicFilter2);
 	}
 	
 	/**
@@ -431,6 +440,42 @@ public class ProtocolProcess {
 							ByteBufUtil.encodeString(PooledByteBufAllocator.DEFAULT, CharBuffer.wrap(shadowResponse.toString()), CharsetUtil.US_ASCII),
 							retain, dup);
 				}
+			}else if(topic.equals("current")){//实时消息
+				Calendar time=Calendar.getInstance();
+				/*byte[] bytes=new byte[]{ 
+						(byte)(time.get(Calendar.YEAR)%100),    //获取年
+						(byte)(time.get(Calendar.MONTH)+1),    //获取月
+						(byte)(time.get(Calendar.DAY_OF_MONTH)),    //获取日
+						(byte)(time.get(Calendar.HOUR_OF_DAY)),    //获取时
+						(byte)(time.get(Calendar.MINUTE)),    //获取分
+						(byte)(time.get(Calendar.SECOND)),    //获取秒
+					};*/
+				byte[] bytes=new byte[8];
+				bytes[0]=(byte)(time.get(Calendar.YEAR)%100);   //获取年
+				bytes[1]=(byte)(time.get(Calendar.MONTH)+1);    //获取月
+				bytes[2]=(byte)(time.get(Calendar.DAY_OF_MONTH));    //获取日
+				bytes[3]=(byte)(time.get(Calendar.HOUR_OF_DAY));    //获取时
+				bytes[4]=(byte)(time.get(Calendar.MINUTE));    //获取分
+				bytes[5]=(byte)(time.get(Calendar.SECOND));    //获取秒
+				int sum=0;
+				for(int i=0;i<bytes.length;i++){
+					sum+=bytes[i];
+				}
+				bytes[6]=(byte)( (sum>>>8) & 0xFF );
+				bytes[7]=(byte)( sum & 0xFF );
+				System.out.println("推送实时消息:");
+				for (byte b : bytes) {
+					System.out.print(b+" ");
+				}
+				char[] chars=new char[8];
+				for(int i=0;i<8;i++){
+					chars[i]=(char) bytes[i];
+				}
+				
+				//sendPublishMessageByByte("current/"+clientID,qos,bytes,retain,dup);
+				sendPublishMessage("current/"+clientID, QoS.AT_MOST_ONCE,//qos, 
+						ByteBufUtil.encodeString(PooledByteBufAllocator.DEFAULT, CharBuffer.wrap(chars), CharsetUtil.US_ASCII),
+						retain, dup);
 			}else{//其他消息
 				processGeneralPublicMessage(clientID,topic,qos,recRetain,message,recPackgeID);
 				sendPublishMessage(topic, qos, message, retain, dup);
@@ -1061,7 +1106,89 @@ public class ProtocolProcess {
 			
 		}
 	}
-	
+	/**
+	  * 取出所有匹配topic的客户端，然后发送public消息给客户端
+	  * @param topic
+	  * @param qos
+	  * @param message
+	  * @param retain
+	  * @param PackgeID
+	  * @author zer0
+	  * @version 1.0
+     * @date 2015-05-19
+	  */
+	private void sendPublishMessageByByte(String topic, QoS originQos, byte[] message, boolean retain, boolean dup){
+		for (final Subscription sub : subscribeStore.getClientListFromTopic(topic)) {
+			
+			String clientID = sub.getClientID();
+			Integer sendPackageID = PackageIDManager.getNextMessageId();
+			String publishKey = String.format("%s%d", clientID, sendPackageID);
+			QoS qos = originQos;
+			
+			//协议P43提到， 假设请求的QoS级别被授权，客户端接收的PUBLISH消息的QoS级别小于或等于这个级别，PUBLISH 消息的级别取决于发布者的原始消息的QoS级别
+			if (originQos.ordinal() > sub.getRequestedQos().ordinal()) {
+				qos = sub.getRequestedQos(); 
+			}
+			
+			PublishMessage publishMessage = (PublishMessage) MQTTMesageFactory.newMessage(
+					FixedHeader.getPublishFixedHeader(dup, qos, retain), 
+					new PublishVariableHeader(topic, sendPackageID), 
+					message);
+			
+			if (this.clients == null) {
+				throw new RuntimeException("内部错误，clients为null");
+			} else {
+				Log.debug("clients为{"+this.clients+"}");
+			}
+			
+			if (this.clients.get(clientID) == null) {
+				throw new RuntimeException("不能从会话列表{"+this.clients+"}中找到clientID:{"+clientID+"}");
+			} else {
+				Log.debug("从会话列表{"+this.clients+"}查找到clientID:{"+clientID+"}");
+			}
+			
+			if (originQos == QoS.AT_MOST_ONCE) {
+				publishMessage = (PublishMessage) MQTTMesageFactory.newMessage(
+						FixedHeader.getPublishFixedHeader(dup, qos, retain), 
+						new PublishVariableHeader(topic), 
+						message);
+				//从会话列表中取出会话，然后通过此会话发送publish消息
+				this.clients.get(clientID).getClient().writeAndFlush(publishMessage);
+			}else {
+				publishKey = String.format("%s%d", clientID, sendPackageID);//针对每个重生成key，保证消息ID不会重复
+				//将ByteBuf转变为byte[]
+				//byte[] messageBytes = new byte[message.readableBytes()];
+				//message.getBytes(message.readerIndex(), messageBytes);
+				PublishEvent storePublishEvent = new PublishEvent(topic, qos, message, retain, clientID, sendPackageID);
+				
+				Log.info("将消息发送给订阅topic的客户端，消息如下:"+new String(message));
+				Log.info("本次包ID为:"+sendPackageID);
+				
+				//从会话列表中取出会话，然后通过此会话发送publish消息
+				this.clients.get(clientID).getClient().writeAndFlush(publishMessage);
+				//存临时Publish消息，用于重发
+				messagesStore.storeQosPublishMessage(publishKey, storePublishEvent);
+				//开启Publish重传任务，在制定时间内未收到PubAck包则重传该条Publish信息
+				Map<String, Object> jobParam = new HashMap<String, Object>();
+				jobParam.put("ProtocolProcess", this);
+				jobParam.put("publishKey", publishKey);
+				QuartzManager.addJob(publishKey, "publish", publishKey, "publish", RePublishJob.class, 10, 2, jobParam);
+			}
+			
+			Log.info("服务器发送消息给客户端{"+clientID+"},topic{"+topic+"},qos{"+qos+"}");
+			
+			if (!sub.isCleanSession()) {
+				//将ByteBuf转变为byte[]
+				
+				PublishEvent newPublishEvt = new PublishEvent(topic, qos, message, 
+						 retain, sub.getClientID(), 
+						 sendPackageID != null ? sendPackageID : 0);
+               messagesStore.storeMessageToSessionForPublish(newPublishEvt);
+			}
+			
+			
+		}
+	}
 	/**
 	  * 发送publish消息给指定ID的客户端
 	  * @param clientID
