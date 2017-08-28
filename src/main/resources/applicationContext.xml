@@ -15,17 +15,24 @@
 	       http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<context:annotation-config />
+
+	<aop:aspectj-autoproxy />
+	
 	<!-- 服务调用扫描包 -->
 	<context:component-scan base-package="com.qingting.protocol.mqttImp.process"/>
 	<!----> <bean class="com.smart.mvc.config.ConfigUtils">
 		<property name="fileEncoding" value="UTF-8" />
 		<property name="locations">
 			<list>
-				
+				<!--数据库参数配置 -->
+				<value>classpath:jdbc.properties</value>
+				<!--Dubbo参数配置 -->
+				<!-- <value>classpath:dubbo.properties</value> -->
+				<!--服务参数配置 -->
 				<value>classpath:service.properties</value>
-				
+				<!--单点登录参数配置 -->
 				<value>classpath:sso.properties</value>
-				
+				<!--当前应用参数配置 -->
 				<value>classpath:config.properties</value>
 			</list>
 		</property>
@@ -43,6 +50,12 @@
 	<!--activeMQ : 用于权限有修改时，异步通知应用更新权限-->
 	<import resource="classpath:spring-mq-sso.xml" />
 	 
+	<!-- 引入Mybatis及数据库相关 -->
+	<import resource="applicationContext-mybatis.xml" />
+	
+	<!-- 引入服务相关 -->
+	<import resource="applicationContext-service.xml" />
+	
 	<!-- 引入服务相关 -->
 	<!-- <import resource="dubbo-consumer.xml" /> -->
 </beans>

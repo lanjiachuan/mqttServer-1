@@ -64,7 +64,7 @@
 	<!-- 单点登录 -->
 	<filter>
 		<filter-name>ssoFilter</filter-name>
-		<filter-class>com.smart.sso.client.CustomSsoFilter</filter-class>
+		<filter-class>com.smart.sso.client.SsoFilter</filter-class>
 		<init-param>
 			<param-name>excludes</param-name>
 			<param-value></param-value>
@@ -120,7 +120,7 @@
 	<servlet>
 		<servlet-name>startServer</servlet-name>
 		<!-- <servlet-class>com.smart.mvc.servlet.ConfigInitServlet</servlet-class> -->
-		<servlet-class>com.qingting.mqtt.server.StartServer</servlet-class>
+		<servlet-class>com.qingting.iot.mqtt.server.StartServer</servlet-class>
 		<load-on-startup>3</load-on-startup>
 		<async-supported>true</async-supported>
 	</servlet>

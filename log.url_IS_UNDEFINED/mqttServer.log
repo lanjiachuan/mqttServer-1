@@ -1,0 +1,100 @@
+2017-08-17 11:36:22,672 DEBUG io.netty.util.internal.logging.InternalLoggerFactory - Using SLF4J as the default logging framework
+2017-08-17 11:36:22,676 DEBUG io.netty.channel.MultithreadEventLoopGroup - -Dio.netty.eventLoopThreads: 8
+2017-08-17 11:36:22,711 DEBUG io.netty.util.internal.PlatformDependent0 - java.nio.Buffer.address: available
+2017-08-17 11:36:22,711 DEBUG io.netty.util.internal.PlatformDependent0 - sun.misc.Unsafe.theUnsafe: available
+2017-08-17 11:36:22,711 DEBUG io.netty.util.internal.PlatformDependent0 - sun.misc.Unsafe.copyMemory: available
+2017-08-17 11:36:22,711 DEBUG io.netty.util.internal.PlatformDependent0 - java.nio.Bits.unaligned: true
+2017-08-17 11:36:22,712 DEBUG io.netty.util.internal.PlatformDependent - Platform: Windows
+2017-08-17 11:36:22,712 DEBUG io.netty.util.internal.PlatformDependent - Java version: 8
+2017-08-17 11:36:22,712 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.noUnsafe: false
+2017-08-17 11:36:22,712 DEBUG io.netty.util.internal.PlatformDependent - sun.misc.Unsafe: available
+2017-08-17 11:36:22,712 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.noJavassist: false
+2017-08-17 11:36:22,934 DEBUG io.netty.util.internal.PlatformDependent - Javassist: available
+2017-08-17 11:36:22,935 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.tmpdir: C:\Users\ADMINI~1\AppData\Local\Temp (java.io.tmpdir)
+2017-08-17 11:36:22,935 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.bitMode: 64 (sun.arch.data.model)
+2017-08-17 11:36:22,935 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.noPreferDirect: false
+2017-08-17 11:36:22,935 DEBUG io.netty.channel.nio.NioEventLoop - -Dio.netty.noKeySetOptimization: false
+2017-08-17 11:36:22,935 DEBUG io.netty.channel.nio.NioEventLoop - -Dio.netty.selectorAutoRebuildThreshold: 512
+2017-08-17 11:36:23,225 DEBUG io.netty.channel.DefaultChannelId - -Dio.netty.processId: 11040 (auto-detected)
+2017-08-17 11:36:23,528 DEBUG io.netty.channel.DefaultChannelId - -Dio.netty.machineId: 38:d5:47:ff:fe:b2:72:b8 (auto-detected)
+2017-08-17 11:36:23,529 DEBUG io.netty.util.internal.ThreadLocalRandom - -Dio.netty.initialSeedUniquifier: 0xac1a170c24c7dbcc (took 306 ms)
+2017-08-17 11:36:23,641 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.numHeapArenas: 4
+2017-08-17 11:36:23,641 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.numDirectArenas: 4
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.pageSize: 8192
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.maxOrder: 11
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.chunkSize: 16777216
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.tinyCacheSize: 512
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.smallCacheSize: 256
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.normalCacheSize: 64
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.maxCachedBufferCapacity: 32768
+2017-08-17 11:36:23,642 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.cacheTrimInterval: 8192
+2017-08-17 11:36:23,646 DEBUG io.netty.buffer.ByteBufUtil - -Dio.netty.allocator.type: pooled
+2017-08-17 11:36:23,646 DEBUG io.netty.buffer.ByteBufUtil - -Dio.netty.threadLocalDirectBufferSize: 65536
+2017-08-17 11:36:23,829 DEBUG io.netty.util.NetUtil - Loopback interface: lo (Software Loopback Interface 1, 127.0.0.1)
+2017-08-17 11:36:23,830 DEBUG io.netty.util.NetUtil - \proc\sys\net\core\somaxconn: 200 (non-existent)
+2017-08-17 11:36:43,062 DEBUG io.netty.util.internal.logging.InternalLoggerFactory - Using SLF4J as the default logging framework
+2017-08-17 11:36:43,069 DEBUG io.netty.channel.MultithreadEventLoopGroup - -Dio.netty.eventLoopThreads: 8
+2017-08-17 11:36:43,109 DEBUG io.netty.util.internal.PlatformDependent0 - java.nio.Buffer.address: available
+2017-08-17 11:36:43,110 DEBUG io.netty.util.internal.PlatformDependent0 - sun.misc.Unsafe.theUnsafe: available
+2017-08-17 11:36:43,110 DEBUG io.netty.util.internal.PlatformDependent0 - sun.misc.Unsafe.copyMemory: available
+2017-08-17 11:36:43,110 DEBUG io.netty.util.internal.PlatformDependent0 - java.nio.Bits.unaligned: true
+2017-08-17 11:36:43,111 DEBUG io.netty.util.internal.PlatformDependent - Platform: Windows
+2017-08-17 11:36:43,111 DEBUG io.netty.util.internal.PlatformDependent - Java version: 8
+2017-08-17 11:36:43,111 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.noUnsafe: false
+2017-08-17 11:36:43,111 DEBUG io.netty.util.internal.PlatformDependent - sun.misc.Unsafe: available
+2017-08-17 11:36:43,111 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.noJavassist: false
+2017-08-17 11:36:43,192 DEBUG io.netty.util.internal.PlatformDependent - Javassist: available
+2017-08-17 11:36:43,193 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.tmpdir: C:\Users\ADMINI~1\AppData\Local\Temp (java.io.tmpdir)
+2017-08-17 11:36:43,193 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.bitMode: 64 (sun.arch.data.model)
+2017-08-17 11:36:43,193 DEBUG io.netty.util.internal.PlatformDependent - -Dio.netty.noPreferDirect: false
+2017-08-17 11:36:43,194 DEBUG io.netty.channel.nio.NioEventLoop - -Dio.netty.noKeySetOptimization: false
+2017-08-17 11:36:43,194 DEBUG io.netty.channel.nio.NioEventLoop - -Dio.netty.selectorAutoRebuildThreshold: 512
+2017-08-17 11:36:43,418 DEBUG io.netty.channel.DefaultChannelId - -Dio.netty.processId: 10504 (auto-detected)
+2017-08-17 11:36:43,465 DEBUG io.netty.channel.DefaultChannelId - -Dio.netty.machineId: 38:d5:47:ff:fe:b2:72:b8 (auto-detected)
+2017-08-17 11:36:43,467 DEBUG io.netty.util.internal.ThreadLocalRandom - -Dio.netty.initialSeedUniquifier: 0xa992bd18c209250d (took 33 ms)
+2017-08-17 11:36:43,494 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.numHeapArenas: 4
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.numDirectArenas: 4
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.pageSize: 8192
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.maxOrder: 11
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.chunkSize: 16777216
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.tinyCacheSize: 512
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.smallCacheSize: 256
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.normalCacheSize: 64
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.maxCachedBufferCapacity: 32768
+2017-08-17 11:36:43,495 DEBUG io.netty.buffer.PooledByteBufAllocator - -Dio.netty.allocator.cacheTrimInterval: 8192
+2017-08-17 11:36:43,500 DEBUG io.netty.buffer.ByteBufUtil - -Dio.netty.allocator.type: pooled
+2017-08-17 11:36:43,500 DEBUG io.netty.buffer.ByteBufUtil - -Dio.netty.threadLocalDirectBufferSize: 65536
+2017-08-17 11:36:43,539 DEBUG io.netty.util.NetUtil - Loopback interface: lo (Software Loopback Interface 1, 127.0.0.1)
+2017-08-17 11:36:43,539 DEBUG io.netty.util.NetUtil - \proc\sys\net\core\somaxconn: 200 (non-existent)
+2017-08-17 11:37:04,057 DEBUG i.n.u.internal.JavassistTypeParameterMatcherGenerator - Generated: io.netty.util.internal.__matchers__.com.qingting.iot.protocol.mqttImp.message.MessageMatcher
+2017-08-17 11:37:04,068 DEBUG io.netty.util.ResourceLeakDetector - -Dio.netty.leakDetectionLevel: simple
+2017-08-17 11:37:04,103 DEBUG io.netty.util.Recycler - -Dio.netty.recycler.maxCapacity: 262144
+2017-08-17 11:37:04,158 WARN io.netty.channel.DefaultChannelPipeline - An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception.
+java.lang.ExceptionInInitializerError: null
+	at com.qingting.iot.protocol.mqttImp.MQTTProcess.channelRead(MQTTProcess.java:31)
+	at io.netty.channel.ChannelHandlerInvokerUtil.invokeChannelReadNow(ChannelHandlerInvokerUtil.java:84)
+	at io.netty.channel.DefaultChannelHandlerInvoker.invokeChannelRead(DefaultChannelHandlerInvoker.java:153)
+	at io.netty.channel.PausableChannelEventExecutor.invokeChannelRead(PausableChannelEventExecutor.java:86)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:389)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:243)
+	at io.netty.channel.ChannelHandlerInvokerUtil.invokeChannelReadNow(ChannelHandlerInvokerUtil.java:84)
+	at io.netty.channel.DefaultChannelHandlerInvoker.invokeChannelRead(DefaultChannelHandlerInvoker.java:153)
+	at io.netty.channel.PausableChannelEventExecutor.invokeChannelRead(PausableChannelEventExecutor.java:86)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:389)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:956)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:127)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:514)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:471)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:385)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:351)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
+	at io.netty.util.internal.chmv8.ForkJoinTask$RunnableExecuteAction.exec(ForkJoinTask.java:1412)
+	at io.netty.util.internal.chmv8.ForkJoinTask.doExec(ForkJoinTask.java:280)
+	at io.netty.util.internal.chmv8.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:877)
+	at io.netty.util.internal.chmv8.ForkJoinPool.scan(ForkJoinPool.java:1706)
+	at io.netty.util.internal.chmv8.ForkJoinPool.runWorker(ForkJoinPool.java:1661)
+	at io.netty.util.internal.chmv8.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:126)
+Caused by: java.lang.NullPointerException: null
+	at com.smart.mvc.util.SpringUtils.getBean(SpringUtils.java:34)
+	at com.qingting.iot.protocol.mqttImp.process.ProtocolProcess.<clinit>(ProtocolProcess.java:82)
+	... 23 common frames omitted

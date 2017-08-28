@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       http://www.springframework.org/schema/beans/spring-beans.xsd
+	       http://www.springframework.org/schema/tx 
+	       http://www.springframework.org/schema/tx/spring-tx.xsd
+	       http://www.springframework.org/schema/context
+		   http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 扫描Mapper -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 这里的basePackage 指定了dao层接口路劲，这里的dao接口不用自己实现 -->
+		<property name="basePackage" value="com.qingting.iot.dao" />
+	</bean>
+
+	<!-- 引入Mybatis基础配置 -->
+	<import resource="classpath:spring-mybatis.xml" />
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!--dataSource属性指定要用到的连接池 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 配置model的alias,别名(即类名) -->
+		<property name="typeAliasesPackage" value="com.qingting.iot.model" />
+		<!-- 所有配置的aliasemapper文件 -->
+		<property name="mapperLocations" value="classpath*:com/qingting/iot/mapper/*.xml" />
+		<!--分页插件 -->
+		<property name="plugins">
+			<ref bean="paginationInterceptor" />
+		</property>
+	</bean>
+</beans>
